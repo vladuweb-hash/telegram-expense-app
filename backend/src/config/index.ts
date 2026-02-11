@@ -17,12 +17,17 @@ export const config = {
   // App URL (для инвойсов)
   appUrl: process.env.APP_URL || 'http://localhost:5173',
   
-  // Security (несколько origin через запятую для разработки: 5173, 5174 и т.д.)
+  // Security (несколько origin через запятую; всегда разрешаем localhost для разработки)
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  corsAllowedOrigins: (process.env.CORS_ORIGIN || 'http://localhost:5173')
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean),
+  corsAllowedOrigins: (() => {
+    const fromEnv = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean);
+    const localhost = ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174'];
+    const combined = [...new Set([...fromEnv, ...localhost])];
+    return combined;
+  })(),
   
   // Rate limiting
   rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
