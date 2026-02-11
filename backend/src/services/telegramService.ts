@@ -11,12 +11,6 @@ interface ParsedInitData {
   hash: string;
 }
 
-interface InvoiceLinkResponse {
-  ok: boolean;
-  result?: string;
-  description?: string;
-}
-
 interface TelegramApiResponse<T> {
   ok: boolean;
   result?: T;

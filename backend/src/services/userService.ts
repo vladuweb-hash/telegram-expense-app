@@ -111,6 +111,35 @@ export class UserService {
   }
 
   /**
+   * Обновить данные пользователя по Telegram ID
+   */
+  async updateUser(
+    telegramId: number,
+    data: { firstName?: string; lastName?: string | null }
+  ): Promise<User | null> {
+    const result = await query<User>(
+      `UPDATE users SET 
+         first_name = COALESCE($2, first_name),
+         last_name = COALESCE($3, last_name)
+       WHERE telegram_id = $1
+       RETURNING 
+         id, 
+         telegram_id as "telegramId", 
+         first_name as "firstName",
+         last_name as "lastName", 
+         username, 
+         language_code as "languageCode",
+         is_premium as "isPremium",
+         premium_until as "premiumUntil",
+         reminders_enabled as "remindersEnabled",
+         created_at as "createdAt", 
+         updated_at as "updatedAt"`,
+      [telegramId, data.firstName ?? null, data.lastName ?? null]
+    );
+    return result.rows[0] || null;
+  }
+
+  /**
    * Получить пользователя по ID
    */
   async getUserById(id: number): Promise<User | null> {

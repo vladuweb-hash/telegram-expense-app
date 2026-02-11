@@ -10,7 +10,7 @@ const analyticsController = new AnalyticsController();
  * Middleware: проверка доступа к аналитике
  * В production требует API ключ или другую авторизацию
  */
-function analyticsAuth(req: Request, res: Response, next: NextFunction) {
+function analyticsAuth(req: Request, _res: Response, next: NextFunction) {
   // В development доступ открыт
   if (config.isDevelopment) {
     return next();

@@ -9,7 +9,7 @@ const telegramService = new TelegramService();
 /**
  * Middleware to authenticate Telegram WebApp requests
  */
-export function telegramAuth(req: Request, res: Response, next: NextFunction) {
+export function telegramAuth(req: Request, _res: Response, next: NextFunction) {
   const initData = req.headers['x-telegram-init-data'] as string;
   
   if (!initData) {

@@ -45,8 +45,23 @@ telegram-mini-app/
 
 ### Требования
 - Node.js >= 18
-- PostgreSQL >= 14
+- PostgreSQL >= 14 (должен быть **запущен** на порту 5432)
 - npm или yarn
+
+### Чек-лист запуска (уже сделано / что сделать)
+
+| Шаг | Статус | Действие |
+|-----|--------|----------|
+| Зависимости | ✅ | `npm install` в `frontend/` и `backend/` уже выполнены |
+| Файлы `.env` | ✅ | В проекте есть `frontend/.env` и `backend/.env` |
+| PostgreSQL | ⚠️ | Должен быть **установлен и запущен**. Иначе миграция падает с `ECONNREFUSED` |
+| База данных | — | Создать БД `telegram_mini_app` и выполнить `npm run db:migrate` в `backend/` |
+| Backend | — | В папке `backend`: `npm run dev` (порт 3000) |
+| Frontend | — | В папке `frontend`: `npm run dev` (порт 5173) |
+
+**Если PostgreSQL не установлен:** см. подробную инструкцию **[docs/POSTGRESQL.md](docs/POSTGRESQL.md)** (установка на Windows + создание БД + настройка `.env`). Либо установите [PostgreSQL для Windows](https://www.postgresql.org/download/windows/) или используйте облачную БД (Neon, Supabase, Railway) и укажите её URL в `backend/.env` в переменной `DATABASE_URL`.
+
+**GitHub:** проект можно пушить в репозиторий: `git remote add origin <url>`, затем `git push -u origin main` (или ваша ветка).
 
 ### 1. Клонирование и установка
 

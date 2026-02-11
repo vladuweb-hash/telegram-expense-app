@@ -111,7 +111,7 @@ export class PaymentController {
   /**
    * POST /webhook/telegram - Webhook для обработки событий от Telegram
    */
-  async handleWebhook(req: Request, res: Response, next: NextFunction) {
+  async handleWebhook(req: Request, res: Response, _next: NextFunction) {
     try {
       const update = req.body;
 

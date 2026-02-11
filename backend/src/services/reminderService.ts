@@ -1,6 +1,5 @@
 import { query } from '../db/index.js';
 import { TelegramService } from './telegramService.js';
-import { REMINDER_CONFIG } from '../config/reminders.js';
 import { logger } from '../utils/logger.js';
 
 interface UserForReminder {

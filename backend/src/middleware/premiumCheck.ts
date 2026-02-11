@@ -11,7 +11,7 @@ const expenseService = new ExpenseService();
 /**
  * Middleware: проверка лимита расходов в месяц
  */
-export async function checkExpenseLimit(req: Request, res: Response, next: NextFunction) {
+export async function checkExpenseLimit(req: Request, _res: Response, next: NextFunction) {
   try {
     const telegramUser = req.telegramUser as TelegramUser;
     
@@ -57,7 +57,7 @@ export async function checkExpenseLimit(req: Request, res: Response, next: NextF
 /**
  * Middleware: только для Premium пользователей
  */
-export async function premiumOnly(req: Request, res: Response, next: NextFunction) {
+export async function premiumOnly(req: Request, _res: Response, next: NextFunction) {
   try {
     const telegramUser = req.telegramUser as TelegramUser;
     
@@ -84,7 +84,7 @@ export async function premiumOnly(req: Request, res: Response, next: NextFunctio
 /**
  * Middleware: проверка доступа к экспорту
  */
-export async function checkExportAccess(req: Request, res: Response, next: NextFunction) {
+export async function checkExportAccess(req: Request, _res: Response, next: NextFunction) {
   try {
     const telegramUser = req.telegramUser as TelegramUser;
     
@@ -111,7 +111,7 @@ export async function checkExportAccess(req: Request, res: Response, next: NextF
 /**
  * Middleware: проверка доступа к кастомным категориям
  */
-export async function checkCustomCategoryAccess(req: Request, res: Response, next: NextFunction) {
+export async function checkCustomCategoryAccess(req: Request, _res: Response, next: NextFunction) {
   try {
     const telegramUser = req.telegramUser as TelegramUser;
     

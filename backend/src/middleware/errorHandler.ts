@@ -18,11 +18,12 @@ export function errorHandler(
   
   // Handle known errors
   if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
+    const body: { success: false; message: string; errors?: unknown } = {
       success: false,
       message: err.message,
-      ...(err.details && { errors: err.details }),
-    });
+    };
+    if (err.details !== undefined) body.errors = err.details;
+    return res.status(err.statusCode).json(body);
   }
   
   // Handle database errors

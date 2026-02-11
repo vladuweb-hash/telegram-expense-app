@@ -48,7 +48,7 @@ export class UserController {
       }
       
       // Update user
-      const user = await userService.updateUser(telegramUser.id, validation.data);
+      const user = await userService.updateUser(telegramUser.id, validation.data as { firstName?: string; lastName?: string | null });
       
       res.json({
         success: true,

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AnalyticsService } from '../services/analyticsService.js';
 import { AppError } from '../utils/AppError.js';
-import { config } from '../config/index.js';
 
 const analyticsService = new AnalyticsService();
 
@@ -9,7 +8,7 @@ export class AnalyticsController {
   /**
    * GET /analytics/summary - Сводка метрик
    */
-  async getSummary(req: Request, res: Response, next: NextFunction) {
+  async getSummary(_req: Request, res: Response, next: NextFunction) {
     try {
       const summary = await analyticsService.getMetricsSummary();
 
@@ -25,7 +24,7 @@ export class AnalyticsController {
   /**
    * GET /analytics/activity - Метрики активности (DAU/WAU/MAU)
    */
-  async getActivityMetrics(req: Request, res: Response, next: NextFunction) {
+  async getActivityMetrics(_req: Request, res: Response, next: NextFunction) {
     try {
       const activity = await analyticsService.getUserActivityMetrics();
 
@@ -85,7 +84,7 @@ export class AnalyticsController {
   /**
    * POST /analytics/collect - Ручной сбор метрик
    */
-  async collectMetrics(req: Request, res: Response, next: NextFunction) {
+  async collectMetrics(_req: Request, res: Response, next: NextFunction) {
     try {
       const metrics = await analyticsService.collectDailyMetrics();
 

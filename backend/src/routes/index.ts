@@ -10,6 +10,7 @@ import webhookRoutes from './webhookRoutes.js';
 
 const router = Router();
 
+router.use('/health', healthRoutes);
 router.use('/users', userRoutes);
 router.use('/expenses', expenseRoutes);
 router.use('/categories', categoryRoutes);

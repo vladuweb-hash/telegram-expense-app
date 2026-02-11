@@ -107,13 +107,13 @@ const migrations = [
   `CREATE TRIGGER update_users_updated_at
    BEFORE UPDATE ON users
    FOR EACH ROW
-   EXECUTE FUNCTION update_updated_at_column()`,
+   EXECUTE PROCEDURE update_updated_at_column()`,
 
   `DROP TRIGGER IF EXISTS update_daily_metrics_updated_at ON daily_metrics`,
   `CREATE TRIGGER update_daily_metrics_updated_at
    BEFORE UPDATE ON daily_metrics
    FOR EACH ROW
-   EXECUTE FUNCTION update_updated_at_column()`,
+   EXECUTE PROCEDURE update_updated_at_column()`,
 
   // ==================== ADD COLUMNS IF NOT EXISTS ====================
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMP WITH TIME ZONE`,
