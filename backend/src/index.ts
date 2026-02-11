@@ -75,6 +75,18 @@ app.use((_req, res) => {
 // Start server
 async function start() {
   try {
+    // В production DATABASE_URL обязателен и не должен быть localhost (на Railway своей БД там нет)
+    const dbUrl = process.env.DATABASE_URL || '';
+    if (config.isProduction) {
+      if (!dbUrl || dbUrl.includes('localhost') || dbUrl.includes('127.0.0.1')) {
+        logger.error(
+          'DATABASE_URL is missing or points to localhost. ' +
+          'On Railway: add Variable Reference from your Postgres service (Variables → Add Reference → Postgres → DATABASE_URL).'
+        );
+        process.exit(1);
+      }
+    }
+
     // Test database connection
     await db.query('SELECT NOW()');
     logger.info('Database connected');
