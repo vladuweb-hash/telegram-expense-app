@@ -14,9 +14,11 @@ const app = express();
 
 // CORS — самым первым, до Helmet (чтобы preflight всегда получал заголовки)
 const allowedOrigins = new Set(config.corsAllowedOrigins);
+const isLocalhost = (origin: string) =>
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && allowedOrigins.has(origin)) {
+  const origin = req.headers.origin as string | undefined;
+  if (origin && (allowedOrigins.has(origin) || isLocalhost(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
