@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useTelegram } from '@/hooks/useTelegram';
 import { useUserStore } from '@/store/userStore';
+import { useExpenseStore } from '@/store/expenseStore';
 import HomePage from '@/components/pages/HomePage';
 import ProfilePage from '@/components/pages/ProfilePage';
 import CategoryPage from '@/components/pages/CategoryPage';
@@ -12,7 +13,8 @@ import Layout from '@/components/layout/Layout';
 
 function App() {
   const { webApp, user } = useTelegram();
-  const { setUser, fetchUser } = useUserStore();
+  const { setUser, fetchUser, userData } = useUserStore();
+  const fetchTodayExpenses = useExpenseStore((s) => s.fetchTodayExpenses);
 
   useEffect(() => {
     // Initialize Telegram WebApp
@@ -39,11 +41,16 @@ function App() {
         languageCode: user.language_code,
         isPremium: user.is_premium,
       });
-      
-      // Fetch user data from backend
       fetchUser();
     }
   }, [user, setUser, fetchUser]);
+
+  // После успешной загрузки пользователя — загружаем расходы за сегодня с сервера
+  useEffect(() => {
+    if (userData) {
+      fetchTodayExpenses();
+    }
+  }, [userData, fetchTodayExpenses]);
 
   return (
     <Layout>

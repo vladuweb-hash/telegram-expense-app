@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import * as expensesApi from '@/api/expenses';
 
 // Категории расходов
 export interface Category {
@@ -29,22 +30,37 @@ export interface Expense {
   createdAt: string;
 }
 
+/** Преобразование расхода с API в локальный формат */
+function expenseFromApi(item: expensesApi.ExpenseFromApi): Expense {
+  const date = item.createdAt.split('T')[0];
+  return {
+    id: String(item.id),
+    categoryId: item.category,
+    amount: item.amount,
+    date,
+    createdAt: item.createdAt,
+  };
+}
+
 interface ExpenseState {
   // Данные
   expenses: Expense[];
   selectedCategory: Category | null;
-  
+  expensesLoading: boolean;
+  expensesError: string | null;
+
   // Computed
   getTodayTotal: () => number;
   getTodayExpenses: () => Expense[];
   getExpensesByDate: (date: string) => Expense[];
   getCategoryById: (id: string) => Category | undefined;
-  
+
   // Actions
   selectCategory: (category: Category) => void;
   clearSelectedCategory: () => void;
-  addExpense: (amount: number) => void;
-  removeExpense: (id: string) => void;
+  fetchTodayExpenses: () => Promise<void>;
+  addExpense: (amount: number) => Promise<void>;
+  removeExpense: (id: string) => Promise<void>;
   clearAllExpenses: () => void;
 }
 
@@ -64,6 +80,8 @@ export const useExpenseStore = create<ExpenseState>()(
       (set, get) => ({
         expenses: [],
         selectedCategory: null,
+        expensesLoading: false,
+        expensesError: null,
 
         // Получить сумму за сегодня
         getTodayTotal: () => {
@@ -103,33 +121,61 @@ export const useExpenseStore = create<ExpenseState>()(
           set({ selectedCategory: null });
         },
 
-        // Добавить расход
-        addExpense: (amount) => {
+        // Загрузить расходы за сегодня с сервера
+        fetchTodayExpenses: async () => {
+          set({ expensesLoading: true, expensesError: null });
+          try {
+            const result = await expensesApi.getTodayExpenses();
+            const today = getTodayDate();
+            const mapped = result.expenses.map(expenseFromApi).filter((e) => e.date === today);
+            set({
+              expenses: get().expenses.filter((e) => e.date !== today).concat(mapped),
+              expensesLoading: false,
+            });
+          } catch (err) {
+            const message = err instanceof Error ? err.message : 'Ошибка загрузки';
+            set({ expensesError: message, expensesLoading: false });
+          }
+        },
+
+        // Добавить расход (с отправкой на сервер)
+        addExpense: async (amount) => {
           const { selectedCategory, expenses } = get();
-          
+
           if (!selectedCategory || amount <= 0) {
             return;
           }
 
-          const newExpense: Expense = {
-            id: generateId(),
-            categoryId: selectedCategory.id,
-            amount,
-            date: getTodayDate(),
-            createdAt: new Date().toISOString(),
-          };
-
-          set({
-            expenses: [...expenses, newExpense],
-            selectedCategory: null,
-          });
+          try {
+            const created = await expensesApi.createExpense(selectedCategory.id, amount);
+            const newExpense = expenseFromApi(created);
+            set({
+              expenses: [...expenses, newExpense],
+              selectedCategory: null,
+            });
+          } catch {
+            set({ selectedCategory: null });
+            throw new Error('Не удалось сохранить расход');
+          }
         },
 
-        // Удалить расход
-        removeExpense: (id) => {
-          set({
-            expenses: get().expenses.filter((e) => e.id !== id),
-          });
+        // Удалить расход (с удалением на сервере)
+        removeExpense: async (id) => {
+          const numericId = parseInt(id, 10);
+          if (Number.isNaN(numericId)) {
+            set({ expenses: get().expenses.filter((e) => e.id !== id) });
+            return;
+          }
+          try {
+            await expensesApi.deleteExpense(numericId);
+            set({
+              expenses: get().expenses.filter((e) => e.id !== id),
+            });
+          } catch {
+            set({
+              expenses: get().expenses.filter((e) => e.id !== id),
+            });
+          }
         },
 
         // Очистить все расходы

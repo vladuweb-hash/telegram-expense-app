@@ -11,7 +11,7 @@ function HomePage() {
   const navigate = useNavigate();
   const { hapticFeedback } = useTelegram();
   const { telegramUser } = useUserStore();
-  const { getTodayTotal, getTodayExpenses, getCategoryById, removeExpense } = useExpenseStore();
+  const { getTodayTotal, getTodayExpenses, getCategoryById, removeExpense, expensesLoading, expensesError } = useExpenseStore();
   const { isPremium, fetchPremiumInfo } = usePremiumStore();
 
   const todayTotal = getTodayTotal();
@@ -82,9 +82,16 @@ function HomePage() {
       {/* Сумма за сегодня */}
       <Card className="text-center py-8">
         <p className="text-tg-hint text-sm mb-2">Расходы за сегодня</p>
-        <p className="text-4xl font-bold">
-          {formatAmount(todayTotal)} <span className="text-2xl">₽</span>
-        </p>
+        {expensesLoading ? (
+          <p className="text-tg-hint">Загрузка...</p>
+        ) : (
+          <p className="text-4xl font-bold">
+            {formatAmount(todayTotal)} <span className="text-2xl">₽</span>
+          </p>
+        )}
+        {expensesError && (
+          <p className="text-red-500 text-sm mt-2">{expensesError}</p>
+        )}
       </Card>
 
       {/* Кнопка добавления */}

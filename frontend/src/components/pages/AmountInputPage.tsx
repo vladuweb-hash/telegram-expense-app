@@ -65,23 +65,23 @@ function AmountInputPage() {
   };
 
   // Сохранение расхода
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const numAmount = parseFloat(amount);
-    
+
     if (!amount || isNaN(numAmount) || numAmount <= 0) {
       setError('Введите корректную сумму');
       hapticFeedback('heavy');
       return;
     }
 
-    // Добавляем расход
-    addExpense(numAmount);
-    
-    // Haptic feedback успеха
-    notificationFeedback('success');
-    
-    // Возвращаемся на главный экран
-    navigate('/');
+    try {
+      await addExpense(numAmount);
+      notificationFeedback('success');
+      navigate('/');
+    } catch {
+      setError('Не удалось сохранить. Проверьте интернет.');
+      notificationFeedback('error');
+    }
   }, [amount, addExpense, navigate, hapticFeedback, notificationFeedback]);
 
   // Быстрые суммы

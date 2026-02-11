@@ -17,8 +17,12 @@ export const config = {
   // App URL (для инвойсов)
   appUrl: process.env.APP_URL || 'http://localhost:5173',
   
-  // Security
+  // Security (несколько origin через запятую для разработки: 5173, 5174 и т.д.)
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  corsAllowedOrigins: (process.env.CORS_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
   
   // Rate limiting
   rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
