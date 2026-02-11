@@ -12,6 +12,22 @@ import { initScheduler } from './jobs/scheduler.js';
 
 const app = express();
 
+// CORS — самым первым, до Helmet (чтобы preflight всегда получал заголовки)
+const allowedOrigins = new Set(config.corsAllowedOrigins);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Telegram-Init-Data, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
+
 // Security middleware
 app.use(helmet());
 app.use(cors({
