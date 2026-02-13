@@ -78,8 +78,9 @@ function AmountInputPage() {
       await addExpense(numAmount);
       notificationFeedback('success');
       navigate('/');
-    } catch {
-      setError('Не удалось сохранить. Проверьте интернет.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Ошибка сервера';
+      setError(msg.includes('Telegram') ? 'Откройте приложение из Telegram (кнопка меню бота).' : `Не удалось сохранить: ${msg}`);
       notificationFeedback('error');
     }
   }, [amount, addExpense, navigate, hapticFeedback, notificationFeedback]);

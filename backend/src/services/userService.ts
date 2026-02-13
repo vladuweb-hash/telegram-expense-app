@@ -68,7 +68,18 @@ export class UserService {
     let user = await this.getUserByTelegramId(telegramUser.id);
 
     if (!user) {
-      user = await this.createUser(telegramUser);
+      try {
+        user = await this.createUser(telegramUser);
+      } catch (err: unknown) {
+        // Гонка: другой запрос уже создал пользователя — просто получаем его
+        const pgErr = err as { code?: string };
+        if (pgErr.code === '23505') {
+          user = await this.getUserByTelegramId(telegramUser.id);
+          if (!user) throw err;
+        } else {
+          throw err;
+        }
+      }
     } else {
       // Синхронизируем данные из Telegram
       user = await this.syncTelegramData(telegramUser);
