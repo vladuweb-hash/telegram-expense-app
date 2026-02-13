@@ -26,8 +26,22 @@ export function telegramAuth(req: Request, _res: Response, next: NextFunction) {
       };
       return next();
     }
-    
-    throw new AppError('Telegram init data is required', 401);
+    // Опция для тестов из браузера (localhost) на прод-сервере
+    if (config.allowLocalhostWithoutTelegram) {
+      const origin = req.headers.origin || '';
+      if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
+        req.telegramUser = {
+          id: 123456789,
+          first_name: 'Dev',
+          last_name: 'User',
+          username: 'devuser',
+          language_code: 'ru',
+          is_premium: false,
+        };
+        return next();
+      }
+    }
+    throw new AppError('Требуются данные для инициализации Telegram', 401);
   }
   
   // Validate init data

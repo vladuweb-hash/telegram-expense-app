@@ -26,7 +26,9 @@ export function initScheduler(): void {
         const stats = await reminderService.sendDailyReminders();
         logger.info('Daily reminders job completed', stats);
       } catch (error) {
-        logger.error('Daily reminders job failed', { error });
+        const msg = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        logger.error(`Daily reminders job failed: ${msg}`, stack ? { stack } : {});
       }
     },
     {
@@ -48,7 +50,9 @@ export function initScheduler(): void {
         const expiredCount = await paymentService.checkExpiredSubscriptions();
         logger.info(`Expired subscriptions check completed: ${expiredCount} deactivated`);
       } catch (error) {
-        logger.error('Expired subscriptions check failed', { error });
+        const msg = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        logger.error(`Expired subscriptions check failed: ${msg}`, stack ? { stack } : {});
       }
     },
     {
@@ -72,7 +76,9 @@ export function initScheduler(): void {
           premiumConversion: metrics.premiumConversionRate.toFixed(2) + '%',
         });
       } catch (error) {
-        logger.error('Daily metrics collection failed', { error });
+        const msg = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        logger.error(`Daily metrics collection failed: ${msg}`, stack ? { stack } : {});
       }
     },
     {
@@ -93,7 +99,9 @@ export function initScheduler(): void {
           activeUsers: metrics.activeUsers,
         });
       } catch (error) {
-        logger.error('Periodic metrics update failed', { error });
+        const msg = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+        logger.error(`Periodic metrics update failed: ${msg}`, stack ? { stack } : {});
       }
     },
     {

@@ -9,6 +9,7 @@ import CategoryPage from '@/components/pages/CategoryPage';
 import AmountInputPage from '@/components/pages/AmountInputPage';
 import PremiumPage from '@/components/pages/PremiumPage';
 import SettingsPage from '@/components/pages/SettingsPage';
+import StatsPage from '@/components/pages/StatsPage';
 import Layout from '@/components/layout/Layout';
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
         <Route path="/expense/amount" element={<AmountInputPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/stats" element={<StatsPage />} />
       </Routes>
     </Layout>
   );

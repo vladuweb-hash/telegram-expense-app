@@ -31,19 +31,32 @@ export class TelegramService {
    * Вызов Telegram Bot API
    */
   private async callApi<T>(method: string, params: Record<string, unknown> = {}): Promise<T> {
-    const response = await fetch(`${this.apiUrl}/${method}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    });
+    if (!this.botToken) {
+      logger.error('Telegram API call skipped: TELEGRAM_BOT_TOKEN is not set');
+      throw new Error('TELEGRAM_BOT_TOKEN is not set');
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(`${this.apiUrl}/${method}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      logger.error(`Telegram API request failed: ${method}`, { error: msg });
+      throw new Error(`Telegram API request failed: ${msg}`);
+    }
 
     const data = (await response.json()) as TelegramApiResponse<T>;
 
     if (!data.ok) {
-      logger.error(`Telegram API error: ${method}`, { error: data.description });
-      throw new Error(data.description || 'Telegram API error');
+      const desc = data.description || 'Unknown error';
+      logger.error(`Telegram API error: ${method}`, { error: desc, code: data.error_code });
+      throw new Error(desc);
     }
 
     return data.result as T;
@@ -122,7 +135,23 @@ export class TelegramService {
   }
 
   /**
-   * Validate Telegram WebApp init data
+   * Parse initData query string into key-value pairs, keeping values raw (as in Telegram docs).
+   */
+  private parseInitDataRaw(initData: string): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const part of initData.split('&')) {
+      const eq = part.indexOf('=');
+      if (eq === -1) continue;
+      const key = part.slice(0, eq);
+      const value = part.slice(eq + 1);
+      map.set(key, value);
+    }
+    return map;
+  }
+
+  /**
+   * Validate Telegram WebApp init data.
+   * Data-check-string must use raw parameter values (no URL decode) to match Telegram's hash.
    */
   validateInitData(initData: string): ParsedInitData | null {
     if (!initData || !this.botToken) {
@@ -130,7 +159,7 @@ export class TelegramService {
     }
 
     try {
-      const params = new URLSearchParams(initData);
+      const params = this.parseInitDataRaw(initData);
       const hash = params.get('hash');
 
       if (!hash) {
@@ -158,14 +187,18 @@ export class TelegramService {
         return null;
       }
 
-      const userData = params.get('user');
-      const authDate = params.get('auth_date');
+      const userRaw = params.get('user');
+      const authDateRaw = params.get('auth_date');
 
-      if (!authDate) {
+      if (!authDateRaw) {
         return null;
       }
 
-      const authTimestamp = parseInt(authDate, 10);
+      const authTimestamp = parseInt(authDateRaw, 10);
+      if (Number.isNaN(authTimestamp)) {
+        return null;
+      }
+
       const now = Math.floor(Date.now() / 1000);
       const maxAge = 24 * 60 * 60;
 
@@ -173,9 +206,18 @@ export class TelegramService {
         return null;
       }
 
+      let user: TelegramUser | undefined;
+      if (userRaw) {
+        try {
+          user = JSON.parse(decodeURIComponent(userRaw)) as TelegramUser;
+        } catch {
+          return null;
+        }
+      }
+
       return {
         query_id: params.get('query_id') || undefined,
-        user: userData ? JSON.parse(userData) : undefined,
+        user,
         auth_date: authTimestamp,
         hash,
       };
@@ -185,18 +227,35 @@ export class TelegramService {
   }
 
   /**
+   * Returns a short reason why validation failed (for logging). Does not run full validation.
+   */
+  getValidationFailureReason(initData: string): string {
+    if (!this.botToken) return 'missing_bot_token';
+    if (!initData?.trim()) return 'empty_init_data';
+    try {
+      const params = this.parseInitDataRaw(initData);
+      if (!params.get('hash')) return 'no_hash';
+      const authDateRaw = params.get('auth_date');
+      if (!authDateRaw) return 'no_auth_date';
+      const authTimestamp = parseInt(authDateRaw, 10);
+      if (Number.isNaN(authTimestamp)) return 'invalid_auth_date';
+      const now = Math.floor(Date.now() / 1000);
+      if (now - authTimestamp > 24 * 60 * 60) return 'auth_expired';
+      return 'hash_mismatch';
+    } catch {
+      return 'parse_error';
+    }
+  }
+
+  /**
    * Parse user from init data without validation (for development)
    */
   parseInitDataUnsafe(initData: string): TelegramUser | null {
     try {
-      const params = new URLSearchParams(initData);
-      const userData = params.get('user');
-
-      if (!userData) {
-        return null;
-      }
-
-      return JSON.parse(userData);
+      const params = this.parseInitDataRaw(initData);
+      const userRaw = params.get('user');
+      if (!userRaw) return null;
+      return JSON.parse(decodeURIComponent(userRaw)) as TelegramUser;
     } catch {
       return null;
     }

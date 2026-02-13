@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { getPremiumInfo, createInvoice, PremiumInfo, PremiumFeature } from '@/api/payments';
+import { getPremiumInfo, createInvoice, PremiumFeature } from '@/api/payments';
 
 interface PremiumState {
   // Данные
@@ -24,7 +24,7 @@ interface PremiumState {
 
 export const usePremiumStore = create<PremiumState>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       isPremium: false,
       premiumUntil: null,
       daysRemaining: null,

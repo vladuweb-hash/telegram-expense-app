@@ -36,4 +36,6 @@ export const config = {
   // Helpers
   isDevelopment: process.env.NODE_ENV === 'development',
   isProduction: process.env.NODE_ENV === 'production',
+  // Разрешить запросы с localhost без Telegram init data (для тестов из браузера)
+  allowLocalhostWithoutTelegram: process.env.ALLOW_LOCALHOST_WITHOUT_TELEGRAM === 'true',
 } as const;

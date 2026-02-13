@@ -42,6 +42,11 @@ function HomePage() {
     navigate('/settings');
   };
 
+  const handleStatsClick = () => {
+    hapticFeedback('light');
+    navigate('/stats');
+  };
+
   // Форматирование суммы
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('ru-RU', {
@@ -79,7 +84,7 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Сумма за сегодня */}
+      {/* Сумма за сегодня + ссылка на статистику */}
       <Card className="text-center py-8">
         <p className="text-tg-hint text-sm mb-2">Расходы за сегодня</p>
         {expensesLoading ? (
@@ -92,6 +97,13 @@ function HomePage() {
         {expensesError && (
           <p className="text-red-500 text-sm mt-2">{expensesError}</p>
         )}
+        <button
+          type="button"
+          onClick={handleStatsClick}
+          className="mt-4 text-sm text-tg-hint hover:text-tg-text transition-colors"
+        >
+          📊 Статистика
+        </button>
       </Card>
 
       {/* Кнопка добавления */}

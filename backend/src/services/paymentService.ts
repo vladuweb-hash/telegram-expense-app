@@ -1,6 +1,7 @@
 import { query } from '../db/index.js';
 import { TelegramService } from './telegramService.js';
 import { PREMIUM_CONFIG } from '../config/premium.js';
+import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { User } from '../types/index.js';
 
@@ -132,18 +133,23 @@ export class PaymentService {
 
     if (expiredCount > 0) {
       logger.info(`Deactivated ${expiredCount} expired Premium subscriptions`);
-      
-      // Уведомляем пользователей об истечении
-      for (const user of result.rows as { id: number; telegram_id: number }[]) {
-        try {
-          await telegramService.sendMessage(
-            user.telegram_id,
-            `⏰ <b>Ваша Premium подписка истекла</b>\n\n` +
-            `Чтобы продолжить пользоваться расширенными возможностями, продлите подписку.`
-          );
-        } catch (error) {
-          logger.error(`Failed to notify user ${user.id} about expiration`, { error });
+
+      // Уведомляем пользователей об истечении только если настроен токен бота
+      if (config.telegramBotToken) {
+        for (const user of result.rows as { id: number; telegram_id: number }[]) {
+          try {
+            await telegramService.sendMessage(
+              user.telegram_id,
+              `⏰ <b>Ваша Premium подписка истекла</b>\n\n` +
+              `Чтобы продолжить пользоваться расширенными возможностями, продлите подписку.`
+            );
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logger.error(`Failed to notify user ${user.id} about expiration: ${msg}`);
+          }
         }
+      } else {
+        logger.warn('TELEGRAM_BOT_TOKEN not set; skipped sending expiration notifications');
       }
     }
 

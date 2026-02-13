@@ -1,10 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import {
-  getAllSettings,
-  updateNotificationSettings,
-  NotificationSettings,
-} from '@/api/settings';
+import { getAllSettings, updateNotificationSettings } from '@/api/settings';
 
 interface SettingsState {
   // Данные

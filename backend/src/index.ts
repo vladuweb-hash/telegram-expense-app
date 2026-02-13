@@ -12,6 +12,9 @@ import { initScheduler } from './jobs/scheduler.js';
 
 const app = express();
 
+// За Railway/прокси: доверять X-Forwarded-For (иначе express-rate-limit выдаёт ERR_ERL_UNEXPECTED_X_FORWARDED_FOR)
+app.set('trust proxy', true);
+
 // CORS — самым первым, до Helmet (чтобы preflight всегда получал заголовки)
 const allowedOrigins = new Set(config.corsAllowedOrigins);
 const isLocalhost = (origin: string) =>
@@ -45,6 +48,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.path.startsWith('/webhook'),
+  validate: { xForwardedForHeader: false }, // уже учтено через trust proxy
 });
 app.use(limiter);
 

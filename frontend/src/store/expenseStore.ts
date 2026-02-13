@@ -69,11 +69,6 @@ function getTodayDate(): string {
   return new Date().toISOString().split('T')[0];
 }
 
-// Генерация уникального ID
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
 export const useExpenseStore = create<ExpenseState>()(
   devtools(
     persist(
