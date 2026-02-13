@@ -184,6 +184,7 @@ export class TelegramService {
         .digest('hex');
 
       if (calculatedHash !== hash) {
+        logger.warn(`InitData hash mismatch: received ${hash.slice(0, 8)}... calc ${calculatedHash.slice(0, 8)}...`);
         return null;
       }
 

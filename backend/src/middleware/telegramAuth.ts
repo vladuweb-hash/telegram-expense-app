@@ -46,7 +46,16 @@ export function telegramAuth(req: Request, _res: Response, next: NextFunction) {
   }
   
   // Validate init data (trimmed — на случай пробелов/переносов от прокси)
-  const parsedData = telegramService.validateInitData(initData);
+  let parsedData = telegramService.validateInitData(initData);
+  // Если не прошло — пробуем декодировать заголовок (иногда прокси кодирует)
+  if (!parsedData && initData.includes('%')) {
+    try {
+      const decoded = decodeURIComponent(initData);
+      parsedData = telegramService.validateInitData(decoded);
+    } catch {
+      // ignore
+    }
+  }
   
   if (!parsedData) {
     const reason = telegramService.getValidationFailureReason(initData);
