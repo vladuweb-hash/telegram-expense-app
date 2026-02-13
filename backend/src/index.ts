@@ -12,8 +12,8 @@ import { initScheduler } from './jobs/scheduler.js';
 
 const app = express();
 
-// За Railway/прокси: доверять X-Forwarded-For (иначе express-rate-limit выдаёт ERR_ERL_UNEXPECTED_X_FORWARDED_FOR)
-app.set('trust proxy', true);
+// За Railway/прокси: доверять одному прокси (1), чтобы rate-limit не ругался на trust proxy
+app.set('trust proxy', 1);
 
 // CORS — самым первым, до Helmet (чтобы preflight всегда получал заголовки)
 const allowedOrigins = new Set(config.corsAllowedOrigins);
