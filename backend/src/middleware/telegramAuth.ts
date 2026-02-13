@@ -48,6 +48,8 @@ export function telegramAuth(req: Request, _res: Response, next: NextFunction) {
   const parsedData = telegramService.validateInitData(initData);
   
   if (!parsedData) {
+    const reason = telegramService.getValidationFailureReason(initData);
+    logger.warn(`Telegram init data validation failed: ${reason}`);
     // In development, try to parse without validation
     if (config.isDevelopment) {
       const user = telegramService.parseInitDataUnsafe(initData);
