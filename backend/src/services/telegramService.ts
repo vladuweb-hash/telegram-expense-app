@@ -263,6 +263,21 @@ export class TelegramService {
   }
 
   /**
+   * Получить auth_date из init data (для проверки свежести при skip hash validation)
+   */
+  getAuthDateFromInitData(initData: string): number | null {
+    try {
+      const params = this.parseInitDataRaw(initData);
+      const authDateRaw = params.get('auth_date');
+      if (!authDateRaw) return null;
+      const n = parseInt(authDateRaw, 10);
+      return Number.isNaN(n) ? null : n;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Проверить подпись webhook от Telegram
    */
   verifyWebhookSignature(body: string, signature: string): boolean {

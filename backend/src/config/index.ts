@@ -38,4 +38,6 @@ export const config = {
   isProduction: process.env.NODE_ENV === 'production',
   // Разрешить запросы с localhost без Telegram init data (для тестов из браузера)
   allowLocalhostWithoutTelegram: process.env.ALLOW_LOCALHOST_WITHOUT_TELEGRAM === 'true',
+  /** Временно не проверять подпись init data (только парсить user). Меньше безопасность, но обход бага с hash_mismatch. */
+  skipTelegramHashValidation: process.env.TELEGRAM_SKIP_HASH_VALIDATION === 'true',
 } as const;

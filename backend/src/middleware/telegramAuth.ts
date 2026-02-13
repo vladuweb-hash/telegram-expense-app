@@ -70,6 +70,19 @@ export function telegramAuth(req: Request, _res: Response, next: NextFunction) {
         return next();
       }
     }
+    // Обходной вариант: не проверять подпись, только распарсить user (если включено в env)
+    if (config.skipTelegramHashValidation) {
+      const user = telegramService.parseInitDataUnsafe(initData);
+      if (user) {
+        const authDate = telegramService.getAuthDateFromInitData(initData);
+        const now = Math.floor(Date.now() / 1000);
+        if (authDate !== null && now - authDate <= 24 * 60 * 60) {
+          logger.warn('TELEGRAM_SKIP_HASH_VALIDATION: accepting init data without signature check');
+          req.telegramUser = user;
+          return next();
+        }
+      }
+    }
     
     throw new AppError('Invalid Telegram init data', 401);
   }
