@@ -10,7 +10,8 @@ const telegramService = new TelegramService();
  * Middleware to authenticate Telegram WebApp requests
  */
 export function telegramAuth(req: Request, _res: Response, next: NextFunction) {
-  const initData = req.headers['x-telegram-init-data'] as string;
+  const rawInitData = req.headers['x-telegram-init-data'] as string;
+  const initData = rawInitData?.trim() || '';
   
   if (!initData) {
     // In development, allow requests without init data
@@ -44,7 +45,7 @@ export function telegramAuth(req: Request, _res: Response, next: NextFunction) {
     throw new AppError('Требуются данные для инициализации Telegram', 401);
   }
   
-  // Validate init data
+  // Validate init data (trimmed — на случай пробелов/переносов от прокси)
   const parsedData = telegramService.validateInitData(initData);
   
   if (!parsedData) {
