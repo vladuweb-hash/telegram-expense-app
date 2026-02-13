@@ -31,6 +31,8 @@ export class UserService {
    * Создать пользователя из данных Telegram
    */
   async createUser(telegramUser: TelegramUser): Promise<User> {
+    // is_premium в нашей БД = подписка на Premium нашего приложения, а не Telegram Premium.
+    // При создании пользователя всегда FALSE; включается только после оплаты через Stars.
     const result = await query<User>(
       `INSERT INTO users (telegram_id, first_name, last_name, username, language_code, is_premium)
        VALUES ($1, $2, $3, $4, $5, $6)
@@ -52,7 +54,7 @@ export class UserService {
         telegramUser.last_name || null,
         telegramUser.username || null,
         telegramUser.language_code || null,
-        telegramUser.is_premium || false,
+        false,
       ]
     );
 
